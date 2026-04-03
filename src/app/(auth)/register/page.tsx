@@ -18,6 +18,7 @@ interface RegisterForm {
   company: string;
   address: string;
   pincode: string;
+  agreeTerms: boolean;
 }
 
 export default function RegisterPage() {
@@ -290,6 +291,24 @@ export default function RegisterPage() {
                     />
                     {errors.confirmPassword && <p className="text-danger text-xs mt-1">{errors.confirmPassword.message}</p>}
                   </div>
+                </div>
+
+                {/* Terms & Privacy Agreement */}
+                <div className="mt-2">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      {...register("agreeTerms", { required: "You must agree to the terms and conditions" })}
+                      className="w-4 h-4 rounded accent-primary mt-0.5 shrink-0"
+                    />
+                    <span className="text-xs text-muted leading-relaxed">
+                      I agree to the{" "}
+                      <Link href="/terms-and-conditions" target="_blank" className="text-primary font-semibold hover:underline">Terms & Conditions</Link>
+                      {" "}and{" "}
+                      <Link href="/privacy-policy" target="_blank" className="text-primary font-semibold hover:underline">Privacy Policy</Link>
+                    </span>
+                  </label>
+                  {errors.agreeTerms && <p className="text-danger text-xs mt-1 ml-7">{errors.agreeTerms.message}</p>}
                 </div>
 
                 <button
