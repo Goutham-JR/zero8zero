@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { Phone, ArrowRight, ArrowLeft } from "lucide-react";
+import { Phone, ArrowRight, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useAuthStore } from "@/store/auth-store";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useState, useEffect } from "react";
@@ -20,6 +20,7 @@ export default function LoginPage() {
   const isAdmin = useAuthStore((s) => s.isAdmin);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -107,12 +108,21 @@ export default function LoginPage() {
               <label className="block text-sm font-medium text-foreground mb-2">
                 Password
               </label>
-              <input
-                type="password"
-                {...register("password", { required: "Password is required" })}
-                className="w-full px-4 py-3 border border-border rounded-xl bg-input-bg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                placeholder="Enter password"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  {...register("password", { required: "Password is required" })}
+                  className="w-full px-4 py-3 pr-12 border border-border rounded-xl bg-input-bg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                  placeholder="Enter password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-muted hover:text-foreground rounded-lg transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
               {errors.password && (
                 <p className="text-danger text-xs mt-1.5">{errors.password.message}</p>
               )}

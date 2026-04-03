@@ -75,7 +75,7 @@ export default function FairUsagePolicyPage() {
         <h3 className="text-sm font-bold text-foreground mb-1">Zero 8 Zero by Cloud Central</h3>
         <p className="text-xs text-muted mb-4">Empowering your business communication through efficient voice broadcasting.</p>
         <div className="space-y-2 text-sm text-muted">
-          <p className="flex items-center gap-2"><Mail className="w-4 h-4 text-primary" /> <a href="mailto:info@cloudcentral.co.in" className="text-primary hover:underline">info@cloudcentral.co.in</a></p>
+          <p className="flex items-center gap-2"><Mail className="w-4 h-4 text-primary" /> <a href="mailto:cloudcentral24@gmail.com" className="text-primary hover:underline">cloudcentral24@gmail.com</a></p>
           <p className="flex items-center gap-2"><Phone className="w-4 h-4 text-primary" /> +91 89515 37972</p>
           <p className="flex items-start gap-2"><MapPin className="w-4 h-4 text-primary shrink-0 mt-0.5" /> 45, Kamarajar Street, 1st Cross, KK Pudur, Coimbatore, Tamil Nadu, 641038</p>
         </div>

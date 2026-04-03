@@ -21,6 +21,7 @@ import {
   X,
   BookUser,
   ChevronDown,
+  Speech,
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 
@@ -29,6 +30,7 @@ const navItems = [
   { href: "/dashboard/create-campaign", label: "Create Campaign", icon: Megaphone },
   { href: "/dashboard/campaigns", label: "Campaigns", icon: History },
   { href: "/dashboard/audio-library", label: "Audio", icon: Music },
+  { href: "/dashboard/text-to-speech", label: "TTS", icon: Speech },
   { href: "/dashboard/contact-library", label: "Contacts", icon: BookUser },
   { href: "/dashboard/agent-groups", label: "Agents", icon: Users },
   { href: "/dashboard/reports", label: "Reports", icon: FileText },

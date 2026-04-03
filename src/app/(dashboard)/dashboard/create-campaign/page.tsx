@@ -486,7 +486,9 @@ function CampaignModal({
 
   // ── Build location JSON ──
   function buildLocationJson(): string {
-    if (locations.length === 0) return "";
+    if (locations.length === 0) {
+      return JSON.stringify({ locationList: [{ locationId: 3, locationName: "Bangalore" }] });
+    }
     return JSON.stringify({
       locationList: locations.map((l) => ({ locationId: l.locationId, locationName: l.locationName })),
     });
@@ -663,6 +665,14 @@ function CampaignModal({
 
         {/* ── Body ── */}
           <div className="px-6 md:px-8 py-6 space-y-5 max-h-[65vh] overflow-y-auto">
+
+            {/* Loading indicator */}
+            {dataLoading && (
+              <div className="flex items-center gap-2 px-4 py-2.5 bg-primary/5 border border-primary/10 rounded-xl text-xs text-muted">
+                <Loader2 className="w-3.5 h-3.5 text-primary animate-spin shrink-0" />
+                Loading audio files, contacts{type === "call-patch" ? ", agent groups" : ""} & locations...
+              </div>
+            )}
 
             {/* 1. Campaign Name */}
             <div>

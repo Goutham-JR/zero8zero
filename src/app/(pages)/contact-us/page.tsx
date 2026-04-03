@@ -7,7 +7,7 @@ const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1488963627666116709/wO
 const WHATSAPP_LINK = "https://wa.me/918951537972";
 const TELEGRAM_LINK = "https://t.me/zero8zero";
 const DISCORD_LINK = "https://discord.gg/7sjpRaGPBX";
-const EMAIL = "info@cloudcentral.co.in";
+const EMAIL = "cloudcentral24@gmail.com";
 const PHONE = "+91 89515 37972";
 
 export default function ContactUsPage() {

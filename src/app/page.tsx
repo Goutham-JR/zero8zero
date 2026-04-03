@@ -187,9 +187,9 @@ export default function Home() {
             <p className="mt-4 text-muted">Pay per call. No hidden fees. Scale when you&apos;re ready.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="animate-on-scroll rotate-in delay-1"><PricingCard title="Starter" price="360" calls="1,000" perCall="0.36" days="28" features={["Simple IVR only", "Audio Library", "Basic Reports", "Email support"]} /></div>
-            <div className="animate-on-scroll scale-in delay-2"><PricingCard title="Business" price="2,000" calls="10,000" perCall="0.20" days="60" featured features={["All 3 IVR Types", "Agent Groups", "Live Analytics", "Priority support"]} /></div>
-            <div className="animate-on-scroll rotate-in delay-3"><PricingCard title="Enterprise" price="6,000" calls="50,000" perCall="0.12" days="180" features={["All IVR Types", "Dedicated CLIs", "Dedicated manager", "Custom integrations"]} /></div>
+            <div className="animate-on-scroll rotate-in delay-1"><PricingCard title="Starter" price="360" calls="1,000" perCall="0.36" days="28" features={["3 Types of IVR", "Bulk Voice Calls", "Live analytics", "Detailed Report"]} /></div>
+            <div className="animate-on-scroll scale-in delay-2"><PricingCard title="Business" price="2,000" calls="10,000" perCall="0.20" days="60" featured features={["3 Types of IVR", "Bulk Voice Calls", "Live analytics", "Detailed Report"]} /></div>
+            <div className="animate-on-scroll rotate-in delay-3"><PricingCard title="Enterprise" price="6,000" calls="50,000" perCall="0.12" days="180" features={["3 Types of IVR", "Bulk Voice Calls", "Live analytics", "Detailed Report"]} /></div>
           </div>
           <p className="text-xs text-muted text-center mt-8 animate-on-scroll delay-4">All prices exclusive of 18% GST (GSTIN: 33DCTPK9031D1ZJ). Plans are non-refundable.</p>
         </div>
@@ -322,7 +322,7 @@ function PricingCard({ title, price, calls, perCall, days, featured, features }:
       <div className="text-4xl font-extrabold text-foreground mb-1">
         <span className="text-lg font-normal text-muted align-top">{"\u20B9"}</span>{price}
       </div>
-      <p className="text-xs text-muted mb-1">{"\u20B9"}{perCall}/call + GST</p>
+      <p className="text-xs text-muted mb-1">{"\u20B9"}{perCall}/call</p>
       <p className="text-xs text-muted mb-8">{days} days validity</p>
       <ul className="text-sm text-left space-y-3 mb-8">
         {features.map((f) => (

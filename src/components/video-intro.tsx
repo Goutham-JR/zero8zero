@@ -1,18 +1,21 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export function VideoIntro({ children }: { children: React.ReactNode }) {
   const [showSite, setShowSite] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  function handleVideoEnd() {
-    setShowSite(true);
-  }
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSite(true), 6000);
+    return () => clearTimeout(timer);
+  }, []);
 
-  function handleVideoError() {
-    setShowSite(true);
-  }
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.play().catch(() => setShowSite(true));
+  }, []);
 
   if (showSite) return <>{children}</>;
 
@@ -24,8 +27,8 @@ export function VideoIntro({ children }: { children: React.ReactNode }) {
         autoPlay
         muted
         playsInline
-        onEnded={handleVideoEnd}
-        onError={handleVideoError}
+        onEnded={() => setShowSite(true)}
+        onError={() => setShowSite(true)}
         className="max-w-[80vw] max-h-[80vh] object-contain"
       />
     </div>

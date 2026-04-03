@@ -35,6 +35,7 @@ interface LiveCampaign {
   numbersUploaded: number;
   numbersProcessed: number;
   callsConnected: number;
+  dndCount: number;
   retries: number;
   pulses: number;
   dtmfCount: number;
@@ -259,6 +260,7 @@ export default function DashboardPage() {
                   <th className="px-6 py-3 font-medium text-right">Uploaded</th>
                   <th className="px-6 py-3 font-medium text-right">Processed</th>
                   <th className="px-6 py-3 font-medium text-right">Connected</th>
+                  <th className="px-6 py-3 font-medium text-right">DND</th>
                   <th className="px-6 py-3 font-medium text-right hide-mobile">Pulses</th>
                   <th className="px-6 py-3 font-medium text-left hide-mobile">Scheduled</th>
                 </tr>
@@ -306,6 +308,9 @@ export default function DashboardPage() {
                       </td>
                       <td className="px-6 py-4 text-right text-success font-medium tabular-nums">
                         {c.callsConnected.toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 text-right text-danger font-medium tabular-nums">
+                        {(c.dndCount ?? 0).toLocaleString()}
                       </td>
                       <td className="px-6 py-4 text-right text-accent-warm font-medium tabular-nums hide-mobile">
                         {c.pulses.toLocaleString()}

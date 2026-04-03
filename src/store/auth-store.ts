@@ -68,7 +68,14 @@ export const useAuthStore = create<AuthState>()(
             return { success: true, isAdmin };
           }
 
-          return { success: false, error: data.message || "Login failed" };
+          const msg = data.message || "Login failed";
+          if (msg === "Something went wrong") {
+            return { success: false, error: "Your account validity has expired. Please contact the support team." };
+          }
+          if (msg === "Bad credentials") {
+            return { success: false, error: "Invalid username or password. If your account is inactive, please contact the support team." };
+          }
+          return { success: false, error: msg };
         } catch {
           return { success: false, error: "Network error. Please try again." };
         }

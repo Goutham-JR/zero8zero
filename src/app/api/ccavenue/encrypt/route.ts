@@ -1,0 +1,70 @@
+import { NextRequest, NextResponse } from "next/server";
+import { encrypt } from "@/lib/ccavenue";
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+
+    const {
+      order_id,
+      amount,
+      currency = "INR",
+      billing_name,
+      billing_email,
+      billing_tel,
+      billing_address,
+      billing_city,
+      billing_state,
+      billing_zip,
+      billing_country = "India",
+      // Custom params to track plan info
+      merchant_param1, // plan name
+      merchant_param2, // calls
+      merchant_param3, // days
+      merchant_param4, // userId
+    } = body;
+
+    const merchantId = process.env.CCAVENUE_MERCHANT_ID!;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
+    const redirectUrl = `${baseUrl}/api/ccavenue/response`;
+    const cancelUrl = `${baseUrl}/api/ccavenue/response`;
+
+    const params = [
+      `merchant_id=${merchantId}`,
+      `order_id=${order_id}`,
+      `currency=${currency}`,
+      `amount=${amount}`,
+      `redirect_url=${redirectUrl}`,
+      `cancel_url=${cancelUrl}`,
+      `language=EN`,
+      `billing_name=${billing_name || ""}`,
+      `billing_address=${billing_address || ""}`,
+      `billing_city=${billing_city || ""}`,
+      `billing_state=${billing_state || ""}`,
+      `billing_zip=${billing_zip || ""}`,
+      `billing_country=${billing_country}`,
+      `billing_tel=${billing_tel || ""}`,
+      `billing_email=${billing_email || ""}`,
+      `merchant_param1=${merchant_param1 || ""}`,
+      `merchant_param2=${merchant_param2 || ""}`,
+      `merchant_param3=${merchant_param3 || ""}`,
+      `merchant_param4=${merchant_param4 || ""}`,
+    ].join("&");
+
+    const encRequest = encrypt(params);
+    const accessCode = process.env.CCAVENUE_ACCESS_CODE!;
+    const ccavenueUrl = `${process.env.CCAVENUE_URL}/transaction/transaction.do?command=initiateTransaction`;
+
+    return NextResponse.json({
+      encRequest,
+      accessCode,
+      ccavenueUrl,
+    });
+  } catch (error) {
+    console.error("CCAvenue encrypt error:", error);
+    return NextResponse.json(
+      { error: "Failed to encrypt payment data" },
+      { status: 500 }
+    );
+  }
+}

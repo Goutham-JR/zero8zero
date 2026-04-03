@@ -62,7 +62,7 @@ export default function PrivacyPolicyPage() {
       <Section title="Contact Us">
         <p className="text-sm text-muted mb-4">If you have any questions about this Privacy Policy, please contact us at:</p>
         <div className="space-y-2 text-sm text-muted">
-          <p className="flex items-center gap-2"><Mail className="w-4 h-4 text-primary" /> <a href="mailto:info@cloudcentral.co.in" className="text-primary hover:underline">info@cloudcentral.co.in</a></p>
+          <p className="flex items-center gap-2"><Mail className="w-4 h-4 text-primary" /> <a href="mailto:cloudcentral24@gmail.com" className="text-primary hover:underline">cloudcentral24@gmail.com</a></p>
           <p className="flex items-center gap-2"><Phone className="w-4 h-4 text-primary" /> +91 89515 37972</p>
         </div>
       </Section>

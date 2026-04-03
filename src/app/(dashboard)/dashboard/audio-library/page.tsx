@@ -347,10 +347,11 @@ export default function AudioLibraryPage() {
             </label>
             <input
               value={fileName}
-              onChange={(e) => setFileName(e.target.value)}
+              onChange={(e) => setFileName(e.target.value.replace(/\s+/g, "_"))}
               className={inputClass}
               placeholder="e.g. welcome_greeting"
             />
+            <p className="text-xs text-muted mt-1.5">Spaces are replaced with underscores</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

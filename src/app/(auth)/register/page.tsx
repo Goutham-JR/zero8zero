@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { Phone, ArrowRight, ArrowLeft } from "lucide-react";
+import { Phone, ArrowRight, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/store/auth-store";
@@ -27,6 +27,7 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -256,21 +257,30 @@ export default function RegisterPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1.5">Password *</label>
-                    <input
-                      type="password"
-                      {...register("password", {
-                        required: "Password is required",
-                        minLength: { value: 8, message: "Min 8 characters" },
-                      })}
-                      className={inputClass}
-                      placeholder="Min 8 characters"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        {...register("password", {
+                          required: "Password is required",
+                          minLength: { value: 8, message: "Min 8 characters" },
+                        })}
+                        className={`${inputClass} pr-12`}
+                        placeholder="Min 8 characters"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-muted hover:text-foreground rounded-lg transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                     {errors.password && <p className="text-danger text-xs mt-1">{errors.password.message}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1.5">Confirm Password *</label>
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       {...register("confirmPassword", {
                         required: "Confirm your password",
                         validate: (val) => val === watch("password") || "Passwords don't match",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Zap,
   Briefcase,
@@ -45,7 +46,7 @@ const TIERS: PlanTier[] = [
       { calls: 3000, perCall: 0.30, days: 28, total: 900 },
       { calls: 5000, perCall: 0.24, days: 28, total: 1200 },
     ],
-    features: ["28 days validity", "Basic IVR", "Call analytics", "Email support"],
+    features: ["3 Types of IVR", "Bulk Voice Calls", "Live analytics", "Detailed Report"],
   },
   {
     name: "Business",
@@ -58,7 +59,7 @@ const TIERS: PlanTier[] = [
       { calls: 20000, perCall: 0.18, days: 60, total: 3600 },
       { calls: 30000, perCall: 0.15, days: 60, total: 4500 },
     ],
-    features: ["60 days validity", "Advanced IVR", "Detailed reports", "Priority support"],
+    features: ["3 Types of IVR", "Bulk Voice Calls", "Live analytics", "Detailed Report"],
   },
   {
     name: "Enterprise",
@@ -71,7 +72,7 @@ const TIERS: PlanTier[] = [
       { calls: 100000, perCall: 0.10, days: 365, total: 10000 },
       { calls: 500000, perCall: 0.08, days: 365, total: 40000 },
     ],
-    features: ["Up to 365 days", "All IVR types", "Dedicated CLIs", "Dedicated manager"],
+    features: ["3 Types of IVR", "Bulk Voice Calls", "Live analytics", "Detailed Report"],
   },
 ];
 
@@ -86,8 +87,20 @@ function savings(plan: Plan) {
 }
 
 export default function PlansPage() {
+  const router = useRouter();
   const [activeTier, setActiveTier] = useState(1);
   const [selectedPlanIdx, setSelectedPlanIdx] = useState(1);
+
+  function handleBuyPlan(tierName: string, p: Plan) {
+    const gstAmount = Math.round(p.total * 1.18);
+    const params = new URLSearchParams({
+      plan: `${tierName} — ${fmt(p.calls)} Calls`,
+      amount: String(gstAmount),
+      calls: String(p.calls),
+      days: String(p.days),
+    });
+    router.push(`/dashboard/payment?${params.toString()}`);
+  }
 
   const tier = TIERS[activeTier];
   const plan = tier.plans[selectedPlanIdx];
@@ -231,6 +244,11 @@ export default function PlansPage() {
 
                   {/* CTA Button */}
                   <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (isActive) handleBuyPlan(tier.name, p);
+                      else setSelectedPlanIdx(idx);
+                    }}
                     className={
                       isActive
                         ? "w-full py-3.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 text-white"
@@ -246,7 +264,7 @@ export default function PlansPage() {
                     }
                   >
                     {isActive ? (
-                      <><Check className="w-4 h-4" /> Selected</>
+                      <><Check className="w-4 h-4" /> Buy Now</>
                     ) : (
                       "Choose Plan"
                     )}
@@ -286,13 +304,14 @@ export default function PlansPage() {
               </div>
             </div>
             <button
+              onClick={() => handleBuyPlan(tier.name, plan)}
               className="px-8 py-3.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 shrink-0"
               style={{
                 background: `linear-gradient(135deg, ${tier.accentFrom}, ${tier.accentTo})`,
                 boxShadow: `0 8px 24px ${tier.accentFrom}30`,
               }}
             >
-              Get Started
+              Buy Now
             </button>
           </div>
         </div>

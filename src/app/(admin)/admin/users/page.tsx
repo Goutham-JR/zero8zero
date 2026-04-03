@@ -32,6 +32,7 @@ import {
   Mail,
   Phone,
   Hash,
+  KeyRound,
 } from "lucide-react";
 import type { AdminUser, PlanItem, ModuleItem } from "@/types";
 
@@ -96,6 +97,9 @@ export default function UserManagementPage() {
   const [creditUser, setCreditUser] = useState<AdminUser | null>(null);
   const [creditAmount, setCreditAmount] = useState("");
   const [creditAction, setCreditAction] = useState(false);
+
+  // Password info modal
+  const [passwordUser, setPasswordUser] = useState<AdminUser | null>(null);
 
 
   const clearMessages = useCallback(() => { setError(null); setSuccess(null); }, []);
@@ -223,10 +227,24 @@ export default function UserManagementPage() {
     clearMessages();
     try {
       const res = await updateUserProfile({
-        userId: editingUser.userId, parent: user.id, name: editForm.name,
-        emailid: editForm.emailid, number: editForm.number, company: editForm.company,
-        address: editForm.address, pincode: editForm.pincode, planId: editForm.planId,
-        accountType: editForm.accountType, expiryDate: `${editForm.expiryDate} 23:59:59`,
+        userId: editingUser.userId,
+        username: editingUser.username,
+        password: editingUser.username,
+        parent: user.id,
+        name: editForm.name,
+        emailid: editForm.emailid,
+        number: editForm.number,
+        company: editForm.company,
+        address: editForm.address || "NA",
+        pincode: editForm.pincode || "000000",
+        planId: editForm.planId,
+        accountType: editForm.accountType,
+        expiryDate: `${editForm.expiryDate} 23:59:59`,
+        userType: "user",
+        groupRows: JSON.stringify({ groupsList: [{ groupId: "34", groupName: "BLR_ALL" }] }),
+        locationRows: JSON.stringify({ locationsList: [{ locationId: "3", locationName: "Bangalore" }] }),
+        moduleId: "1",
+        planType: "0",
       });
       setSuccess(res.message || `User "${editingUser.username}" updated.`);
       setEditingUser(null);
@@ -385,6 +403,10 @@ export default function UserManagementPage() {
                       className="p-2 rounded-lg text-muted hover:text-success hover:bg-success/10 transition-colors opacity-60 group-hover:opacity-100">
                       <Wallet className="w-4 h-4" />
                     </button>
+                    <button onClick={() => setPasswordUser(u)} title="Password Info"
+                      className="p-2 rounded-lg text-muted hover:text-accent-warm hover:bg-accent-warm/10 transition-colors opacity-60 group-hover:opacity-100">
+                      <KeyRound className="w-4 h-4" />
+                    </button>
                     <button onClick={() => openEditModal(u)} title="Edit"
                       className="p-2 rounded-lg text-muted hover:text-primary hover:bg-primary/10 transition-colors opacity-60 group-hover:opacity-100">
                       <Pencil className="w-4 h-4" />
@@ -477,6 +499,44 @@ export default function UserManagementPage() {
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-danger to-accent-warm text-white rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 text-sm">
                 {creditAction ? <Loader2 className="w-4 h-4 animate-spin" /> : <Minus className="w-4 h-4" />}
                 Remove Credits
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Password Info Modal ── */}
+      {passwordUser && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-card rounded-2xl border border-border p-6 w-full max-w-md shadow-2xl">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h3 className="text-lg font-bold text-foreground">Password Info</h3>
+                <p className="text-sm text-muted mt-0.5">
+                  {passwordUser.name || passwordUser.username} <span className="font-mono text-xs">#{passwordUser.userId}</span>
+                </p>
+              </div>
+              <button onClick={() => setPasswordUser(null)} className="p-2 rounded-lg text-muted hover:text-foreground hover:bg-surface transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex items-start gap-3 p-4 bg-accent-warm/10 border border-accent-warm/20 rounded-xl">
+              <AlertCircle className="w-5 h-5 text-accent-warm shrink-0 mt-0.5" />
+              <div className="text-sm text-foreground">
+                <p className="font-medium mb-1">Password cannot be changed</p>
+                <p className="text-muted text-xs leading-relaxed">
+                  The OBD3 API does not support password changes for existing users. To reset a password, the user must be deleted and re-created with a new password. Contact the platform administrator for assistance.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5">
+              <button
+                onClick={() => setPasswordUser(null)}
+                className="w-full py-3 bg-surface border border-border rounded-xl text-sm font-medium text-foreground hover:bg-card-hover transition-all"
+              >
+                Close
               </button>
             </div>
           </div>
