@@ -23,6 +23,7 @@ export interface UserProfile {
   userType: string;
   parentCompany: string;
   planId: number;
+  planName?: string;
   pulsePrice: number;
   pulseDuration: number;
   accountType: number;

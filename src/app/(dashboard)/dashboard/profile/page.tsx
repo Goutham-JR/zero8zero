@@ -184,18 +184,13 @@ export default function ProfilePage() {
           <div className="space-y-4">
             <InfoRow
               icon={<CreditCard className="w-4 h-4" />}
-              label="Pulse Price"
-              value={`${profile.pulsePrice}`}
+              label="Plan Name"
+              value={profile.planName || "N/A"}
             />
             <InfoRow
-              icon={<Clock className="w-4 h-4" />}
-              label="Pulse Duration"
-              value={`${profile.pulseDuration}s`}
-            />
-            <InfoRow
-              icon={<Phone className="w-4 h-4" />}
-              label="Channels"
-              value={`${profile.channels}`}
+              icon={<Hash className="w-4 h-4" />}
+              label="Plan ID"
+              value={`${profile.planId || "N/A"}`}
             />
             <InfoRow
               icon={<Calendar className="w-4 h-4" />}
