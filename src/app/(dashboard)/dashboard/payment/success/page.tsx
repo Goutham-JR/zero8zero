@@ -13,6 +13,7 @@ export default function PaymentSuccessPage() {
   const planName = params.get("plan") || "";
   const calls = params.get("calls") || "";
   const days = params.get("days") || "";
+  const planId = params.get("planId") || "";
 
   return (
     <div className="max-w-lg mx-auto py-16 space-y-8">
@@ -39,6 +40,9 @@ export default function PaymentSuccessPage() {
         <div className="space-y-3">
           {planName && (
             <DetailRow label="Plan" value={planName} />
+          )}
+          {planId && (
+            <DetailRow label="Plan ID" value={planId} mono />
           )}
           {amount && (
             <DetailRow label="Amount Paid" value={`₹${Number(amount).toLocaleString("en-IN")}`} highlight />

@@ -15,6 +15,7 @@ import {
   fetchModules,
 } from "@/services/admin.service";
 import { getDefaultDateRange } from "@/services/api";
+import { logToSheetClient } from "@/lib/google-sheet";
 import {
   Users,
   Plus,
@@ -246,6 +247,24 @@ export default function UserManagementPage() {
         moduleId: "1",
         planType: "0",
       });
+      // Update user details in Google Sheet (don't block on failure)
+      logToSheetClient({
+        _sheet: "User Updates",
+        userId: String(editingUser.userId),
+        username: editingUser.username || "",
+        name: editForm.name || "",
+        email: editForm.emailid || "",
+        phone: editForm.number || "",
+        company: editForm.company || "",
+        address: editForm.address || "NA",
+        pincode: editForm.pincode || "000000",
+        planId: editForm.planId || "",
+        accountType: editForm.accountType || "0",
+        expiryDate: `${editForm.expiryDate} 23:59:59`,
+        updatedOn: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+        updatedBy: user?.username || "admin",
+      }).catch(() => {});
+
       setSuccess(res.message || `User "${editingUser.username}" updated.`);
       setEditingUser(null);
       await loadUsers();

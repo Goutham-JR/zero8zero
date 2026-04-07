@@ -22,6 +22,8 @@ export default function PaymentPage() {
   const amount = searchParams.get("amount") || "";
   const calls = searchParams.get("calls") || "";
   const days = searchParams.get("days") || "";
+  const basePrice = searchParams.get("basePrice") || "";
+  const planId = searchParams.get("planId") || "";
 
   useEffect(() => {
     if (!amount || !user) return;
@@ -43,9 +45,10 @@ export default function PaymentPage() {
         billing_zip: profile?.pincode ? String(profile.pincode) : "",
         billing_country: "India",
         merchant_param1: planName,
-        merchant_param2: calls,
-        merchant_param3: days,
-        merchant_param4: user.id,
+        merchant_param2: `${calls}_${days}`,
+        merchant_param3: user.id,
+        merchant_param4: basePrice,
+        merchant_param5: planId,
       }),
     })
       .then((res) => res.json())
@@ -62,7 +65,7 @@ export default function PaymentPage() {
         setError("Failed to initiate payment. Please try again.");
         setLoading(false);
       });
-  }, [amount, user, profile, planName, calls, days]);
+  }, [amount, user, profile, planName, calls, days, basePrice, planId]);
 
   // Auto-submit form once payment data is ready
   useEffect(() => {

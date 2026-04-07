@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Zap,
   Briefcase,
@@ -15,6 +16,7 @@ import {
   Shield,
   Headphones,
   BarChart3,
+  MessageSquare,
 } from "lucide-react";
 
 interface Plan {
@@ -22,6 +24,7 @@ interface Plan {
   perCall: number;
   days: number;
   total: number;
+  planId: string;
 }
 
 interface PlanTier {
@@ -42,9 +45,9 @@ const TIERS: PlanTier[] = [
     accentFrom: "#3b82f6",
     accentTo: "#60a5fa",
     plans: [
-      { calls: 1000, perCall: 0.36, days: 28, total: 360 },
-      { calls: 3000, perCall: 0.30, days: 28, total: 900 },
-      { calls: 5000, perCall: 0.24, days: 28, total: 1200 },
+      { calls: 1000, perCall: 0.36, days: 28, total: 360, planId: "100498" },
+      { calls: 3000, perCall: 0.30, days: 28, total: 900, planId: "100499" },
+      { calls: 5000, perCall: 0.24, days: 28, total: 1200, planId: "100500" },
     ],
     features: ["3 Types of IVR", "Bulk Voice Calls", "Live analytics", "Detailed Report"],
   },
@@ -55,9 +58,9 @@ const TIERS: PlanTier[] = [
     accentFrom: "#8b5cf6",
     accentTo: "#a78bfa",
     plans: [
-      { calls: 10000, perCall: 0.20, days: 60, total: 2000 },
-      { calls: 20000, perCall: 0.18, days: 60, total: 3600 },
-      { calls: 30000, perCall: 0.15, days: 60, total: 4500 },
+      { calls: 10000, perCall: 0.20, days: 60, total: 2000, planId: "100501" },
+      { calls: 20000, perCall: 0.18, days: 60, total: 3600, planId: "100502" },
+      { calls: 30000, perCall: 0.15, days: 60, total: 4500, planId: "100503" },
     ],
     features: ["3 Types of IVR", "Bulk Voice Calls", "Live analytics", "Detailed Report"],
   },
@@ -68,9 +71,9 @@ const TIERS: PlanTier[] = [
     accentFrom: "#06b6d4",
     accentTo: "#22d3ee",
     plans: [
-      { calls: 50000, perCall: 0.12, days: 180, total: 6000 },
-      { calls: 100000, perCall: 0.10, days: 365, total: 10000 },
-      { calls: 500000, perCall: 0.08, days: 365, total: 40000 },
+      { calls: 50000, perCall: 0.12, days: 180, total: 6000, planId: "100504" },
+      { calls: 100000, perCall: 0.10, days: 365, total: 10000, planId: "100505" },
+      { calls: 500000, perCall: 0.08, days: 365, total: 40000, planId: "100506" },
     ],
     features: ["3 Types of IVR", "Bulk Voice Calls", "Live analytics", "Detailed Report"],
   },
@@ -98,12 +101,14 @@ export default function PlansPage() {
       amount: String(gstAmount),
       calls: String(p.calls),
       days: String(p.days),
+      basePrice: String(p.total),
+      planId: String(p.planId),
     });
     router.push(`/dashboard/payment?${params.toString()}`);
   }
 
-  const tier = TIERS[activeTier];
-  const plan = tier.plans[selectedPlanIdx];
+  const tier = TIERS[activeTier] || TIERS[0];
+  const plan = tier.plans[selectedPlanIdx] || tier.plans[0];
 
   return (
     <div className="space-y-10 max-w-5xl mx-auto">
@@ -129,7 +134,7 @@ export default function PlansPage() {
               key={t.name}
               onClick={() => { setActiveTier(idx); setSelectedPlanIdx(idx === 2 ? 0 : 1); }}
               className={`flex items-center gap-2 px-5 md:px-8 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
-                activeTier === idx
+                activeTier === idx && activeTier < 3
                   ? "bg-card text-foreground shadow-lg border border-border"
                   : "text-muted hover:text-foreground"
               }`}
@@ -138,13 +143,88 @@ export default function PlansPage() {
               <span className="hidden sm:inline">{t.name}</span>
             </button>
           ))}
+          <button
+            onClick={() => setActiveTier(3)}
+            className={`flex items-center gap-2 px-5 md:px-8 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
+              activeTier === 3
+                ? "bg-card text-foreground shadow-lg border border-border"
+                : "text-muted hover:text-foreground"
+            }`}
+          >
+            <MessageSquare className="w-5 h-5" />
+            <span className="hidden sm:inline">Custom</span>
+          </button>
         </div>
       </div>
 
+      {activeTier === 3 ? (
+        /* Custom Plan View */
+        <div className="space-y-8">
+          <div className="text-center">
+            <p className="text-lg font-bold text-foreground">Custom Pack</p>
+            <p className="text-sm text-muted mt-0.5">Tailored solutions built for your business needs</p>
+          </div>
+
+          <div className="max-w-2xl mx-auto">
+            <div className="relative rounded-2xl p-[1px] bg-gradient-to-r from-primary via-secondary to-accent">
+              <div className="bg-card rounded-2xl p-8 md:p-10 text-center space-y-6">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center mx-auto">
+                  <MessageSquare className="w-8 h-8 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-extrabold text-foreground">Need a Custom Plan?</h3>
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full mt-3">
+                    <Zap className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-sm font-semibold text-primary">Minimum 2,00,000 calls</span>
+                  </div>
+                  <p className="text-muted mt-3 max-w-md mx-auto leading-relaxed">
+                    Custom plans are available for volumes starting at 2 lakh calls. Get custom call rates, dedicated CLIs, and a tailored solution built for your business needs and budget.
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                  {[
+                    { label: "Custom Call Rates", desc: "Negotiate per-call pricing" },
+                    { label: "Flexible Validity", desc: "Choose your own duration" },
+                    { label: "Volume Discounts", desc: "Better rates at scale" },
+                  ].map((f) => (
+                    <div key={f.label} className="bg-surface rounded-xl p-4 border border-border">
+                      <p className="text-sm font-semibold text-foreground">{f.label}</p>
+                      <p className="text-xs text-muted mt-0.5">{f.desc}</p>
+                    </div>
+                  ))}
+                </div>
+                <Link
+                  href="/contact-us"
+                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-sm font-bold text-white gradient-bg hover:opacity-90 transition-all shadow-lg shadow-primary/25"
+                >
+                  <Headphones className="w-4 h-4" /> Contact Support Team
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Regular Plan View */
+        <>
       {/* Tier Description */}
       <div className="text-center">
         <p className="text-lg font-bold text-foreground">{tier.name} Pack</p>
         <p className="text-sm text-muted mt-0.5">{tier.tagline}</p>
+      </div>
+
+      {/* Plan Change Warning */}
+      <div className="bg-accent-warm/5 border border-accent-warm/20 rounded-2xl p-4 flex items-start gap-3">
+        <div className="w-8 h-8 rounded-xl bg-accent-warm/10 flex items-center justify-center shrink-0 mt-0.5">
+          <svg className="w-4 h-4 text-accent-warm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-foreground">Switching plans will reset your credits</p>
+          <p className="text-xs text-muted mt-0.5 leading-relaxed">
+            If you purchase a different plan from your current one, your existing credit balance will be removed and replaced with the new plan&apos;s credits. Purchasing the same plan will simply add credits to your current balance.
+          </p>
+        </div>
       </div>
 
       {/* Plan Cards */}
@@ -385,9 +465,12 @@ export default function PlansPage() {
         </div>
       </div>
 
+      </>
+      )}
+
       {/* Footer */}
       <p className="text-xs text-muted text-center pb-4">
-        All prices are exclusive of 18% GST (GSTIN: 33DCTPK9031D1ZJ). Plans are non-refundable. Need a custom plan? Contact our sales team.
+        All prices are exclusive of 18% GST (GSTIN: 33DCTPK9031D1ZJ). Plans are non-refundable.
       </p>
     </div>
   );

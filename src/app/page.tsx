@@ -187,9 +187,9 @@ export default function Home() {
             <p className="mt-4 text-muted">Pay per call. No hidden fees. Scale when you&apos;re ready.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="animate-on-scroll rotate-in delay-1"><PricingCard title="Starter" price="360" calls="1,000" perCall="0.36" days="28" features={["3 Types of IVR", "Bulk Voice Calls", "Live analytics", "Detailed Report"]} /></div>
-            <div className="animate-on-scroll scale-in delay-2"><PricingCard title="Business" price="2,000" calls="10,000" perCall="0.20" days="60" featured features={["3 Types of IVR", "Bulk Voice Calls", "Live analytics", "Detailed Report"]} /></div>
-            <div className="animate-on-scroll rotate-in delay-3"><PricingCard title="Enterprise" price="6,000" calls="50,000" perCall="0.12" days="180" features={["3 Types of IVR", "Bulk Voice Calls", "Live analytics", "Detailed Report"]} /></div>
+            <div className="animate-on-scroll rotate-in delay-1"><PricingCard title="Starter" price="360" calls="1,000" perCall="0.36" days="28" planId="100498" features={["3 Types of IVR", "Bulk Voice Calls", "Live analytics", "Detailed Report"]} /></div>
+            <div className="animate-on-scroll scale-in delay-2"><PricingCard title="Business" price="2,000" calls="10,000" perCall="0.20" days="60" planId="100501" featured features={["3 Types of IVR", "Bulk Voice Calls", "Live analytics", "Detailed Report"]} /></div>
+            <div className="animate-on-scroll rotate-in delay-3"><PricingCard title="Enterprise" price="6,000" calls="50,000" perCall="0.12" days="180" planId="100504" features={["3 Types of IVR", "Bulk Voice Calls", "Live analytics", "Detailed Report"]} /></div>
           </div>
           <p className="text-xs text-muted text-center mt-8 animate-on-scroll delay-4">All prices exclusive of 18% GST (GSTIN: 33DCTPK9031D1ZJ). Plans are non-refundable.</p>
         </div>
@@ -311,13 +311,14 @@ function FeatureCard({ icon, title, description, color, bg }: { icon: React.Reac
 
 /* ─── Pricing Card ─── */
 
-function PricingCard({ title, price, calls, perCall, days, featured, features }: { title: string; price: string; calls: string; perCall: string; days: string; featured?: boolean; features: string[] }) {
+function PricingCard({ title, price, calls, perCall, days, planId, featured, features }: { title: string; price: string; calls: string; perCall: string; days: string; planId: string; featured?: boolean; features: string[] }) {
   return (
     <div className={`relative p-8 rounded-2xl text-center transition-all duration-300 hover:-translate-y-1 ${featured ? "gradient-border bg-card shadow-xl shadow-primary/10 scale-[1.02]" : "border border-border bg-card hover:border-primary/30 hover:shadow-lg"}`}>
       {featured && (
         <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full gradient-bg text-white text-xs font-semibold shadow-lg">Most Popular</div>
       )}
       <h3 className="text-lg font-semibold text-foreground mb-1">{title}</h3>
+      <p className="text-xs text-muted mb-1 font-mono">Plan ID: {planId}</p>
       <p className="text-sm text-muted mb-5">{calls} calls &middot; {days} days</p>
       <div className="text-4xl font-extrabold text-foreground mb-1">
         <span className="text-lg font-normal text-muted align-top">{"\u20B9"}</span>{price}

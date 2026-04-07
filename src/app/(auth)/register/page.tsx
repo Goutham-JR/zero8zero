@@ -7,6 +7,7 @@ import { Phone, ArrowRight, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/store/auth-store";
+import { logToSheetClient } from "@/lib/google-sheet";
 
 interface RegisterForm {
   username: string;
@@ -93,6 +94,30 @@ export default function RegisterPage() {
       const result = text ? JSON.parse(text) : {};
 
       if (result.userId) {
+        // Log new registration to Google Sheet
+        await logToSheetClient({
+          _sheet: "Users",
+          userId: String(result.userId),
+          username: data.username,
+          name: data.name,
+          email: data.emailid,
+          phone: data.number,
+          company: data.company,
+          credits: "0",
+          creditsUsed: "0",
+          userType: "user",
+          planName: "Trial",
+          pulsePrice: "",
+          pulseDuration: "15",
+          accountType: "0",
+          registeredOn: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+          expiryDate: "2027-12-31 23:59:59",
+          groups: "BLR_ALL",
+          locations: "Bangalore",
+          modules: "",
+          status: "Active",
+        });
+
         setSuccess(true);
         setTimeout(() => router.push("/login"), 3000);
       } else {
