@@ -1,10 +1,19 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { XCircle, ArrowLeft, RefreshCw } from "lucide-react";
+import { XCircle, ArrowLeft, RefreshCw, Loader2 } from "lucide-react";
 
 export default function PaymentFailurePage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center py-24"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>}>
+      <FailureContent />
+    </Suspense>
+  );
+}
+
+function FailureContent() {
   const params = useSearchParams();
 
   const orderId = params.get("order_id") || "";

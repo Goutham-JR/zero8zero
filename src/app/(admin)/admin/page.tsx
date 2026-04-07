@@ -20,6 +20,7 @@ import {
   RefreshCw,
   TrendingUp,
 } from "lucide-react";
+import { Pagination } from "@/components/pagination";
 
 interface DashboardHeader {
   totalCalls: number;
@@ -212,42 +213,7 @@ export default function AdminDashboardPage() {
           </table>
         </div>
 
-        {/* Pagination */}
-        {(() => {
-          const tp = Math.ceil(userStats.length / STATS_PAGE_SIZE);
-          if (tp <= 1) return null;
-          return (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-6 py-4 border-t border-border">
-              <p className="text-xs text-muted">
-                Showing {(statsPage - 1) * STATS_PAGE_SIZE + 1}&ndash;{Math.min(statsPage * STATS_PAGE_SIZE, userStats.length)} of {userStats.length}
-              </p>
-              <div className="flex items-center gap-1">
-                <button onClick={() => setStatsPage(1)} disabled={statsPage === 1} className="px-2.5 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-surface transition-all disabled:opacity-30 disabled:cursor-not-allowed hidden sm:block">First</button>
-                <button onClick={() => setStatsPage((p) => Math.max(1, p - 1))} disabled={statsPage === 1} className="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-surface transition-all disabled:opacity-30 disabled:cursor-not-allowed">Prev</button>
-                {(() => {
-                  const pages: (number | "dots")[] = [];
-                  if (tp <= 7) { for (let i = 1; i <= tp; i++) pages.push(i); }
-                  else {
-                    pages.push(1);
-                    if (statsPage > 3) pages.push("dots");
-                    for (let i = Math.max(2, statsPage - 1); i <= Math.min(tp - 1, statsPage + 1); i++) pages.push(i);
-                    if (statsPage < tp - 2) pages.push("dots");
-                    pages.push(tp);
-                  }
-                  return pages.map((page, idx) =>
-                    page === "dots" ? (
-                      <span key={`d${idx}`} className="w-8 h-8 flex items-center justify-center text-muted text-sm">...</span>
-                    ) : (
-                      <button key={page} onClick={() => setStatsPage(page)} className={`w-8 h-8 rounded-lg text-sm font-semibold transition-all ${statsPage === page ? "bg-gradient-to-br from-danger to-accent-warm text-white shadow-lg" : "text-muted hover:text-foreground hover:bg-surface"}`}>{page}</button>
-                    )
-                  );
-                })()}
-                <button onClick={() => setStatsPage((p) => Math.min(tp, p + 1))} disabled={statsPage === tp} className="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-surface transition-all disabled:opacity-30 disabled:cursor-not-allowed">Next</button>
-                <button onClick={() => setStatsPage(tp)} disabled={statsPage === tp} className="px-2.5 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-surface transition-all disabled:opacity-30 disabled:cursor-not-allowed hidden sm:block">Last</button>
-              </div>
-            </div>
-          );
-        })()}
+        <Pagination currentPage={statsPage} totalPages={Math.ceil(userStats.length / STATS_PAGE_SIZE)} totalItems={userStats.length} pageSize={STATS_PAGE_SIZE} onPageChange={setStatsPage} activeClass="bg-gradient-to-br from-danger to-accent-warm text-white shadow-lg" />
       </div>
 
       {/* Quick Actions */}

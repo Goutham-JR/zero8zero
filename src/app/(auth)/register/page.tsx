@@ -7,7 +7,6 @@ import { Phone, ArrowRight, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/store/auth-store";
-import { logToSheetClient } from "@/lib/google-sheet";
 
 interface RegisterForm {
   username: string;
@@ -49,79 +48,28 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      // Get service token from reseller account for registration
-      const loginRes = await fetch("https://obd3api.expressivr.com/api/obd/login", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: "Cloudcentral", password: "Admin@123" }),
-      });
-      const loginData = await loginRes.json();
-      if (!loginData.token) {
-        setError("Registration service unavailable. Please try again later.");
-        setLoading(false);
-        return;
-      }
-
-      const res = await fetch("https://obd3api.expressivr.com/api/obd/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${loginData.token}`,
-        },
         body: JSON.stringify({
           username: data.username,
           password: data.password,
-          planId: "100318",
           name: data.name,
           emailid: data.emailid,
           number: data.number,
           address: data.address || "",
           company: data.company,
           pincode: data.pincode,
-          parent: loginData.userid,
-          accountType: "0",
-          userType: "user",
-          expiryDate: "2027-12-31 23:59:59",
-          auth_token: loginData.token,
-          groupRows: JSON.stringify({ groupsList: [{ groupId: "34", groupName: "BLR_ALL" }] }),
-          locationRows: JSON.stringify({ locationsList: [{ locationId: "3", locationName: "Bangalore" }] }),
-          moduleId: "1",
-          planType: "0",
         }),
       });
 
-      const text = await res.text();
-      const result = text ? JSON.parse(text) : {};
+      const result = await res.json();
 
       if (result.userId) {
-        // Log new registration to Google Sheet
-        await logToSheetClient({
-          _sheet: "Users",
-          userId: String(result.userId),
-          username: data.username,
-          name: data.name,
-          email: data.emailid,
-          phone: data.number,
-          company: data.company,
-          credits: "0",
-          creditsUsed: "0",
-          userType: "user",
-          planName: "Trial",
-          pulsePrice: "",
-          pulseDuration: "15",
-          accountType: "0",
-          registeredOn: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
-          expiryDate: "2027-12-31 23:59:59",
-          groups: "BLR_ALL",
-          locations: "Bangalore",
-          modules: "",
-          status: "Active",
-        });
-
         setSuccess(true);
         setTimeout(() => router.push("/login"), 3000);
       } else {
-        setError(result.message || "Registration failed. Please try again.");
+        setError(result.error || result.message || "Registration failed. Please try again.");
       }
     } catch {
       setError("Network error. Please try again.");

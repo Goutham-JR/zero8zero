@@ -36,6 +36,7 @@ import {
   KeyRound,
 } from "lucide-react";
 import type { AdminUser, PlanItem, ModuleItem } from "@/types";
+import { Pagination } from "@/components/pagination";
 
 const INPUT_CLASS =
   "w-full px-4 py-3 border border-border rounded-xl bg-input-bg text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-danger/30 focus:border-danger transition-all text-sm";
@@ -452,18 +453,16 @@ export default function UserManagementPage() {
           </div>
 
           {/* Pagination */}
-          {usersTotalPages > 1 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-card rounded-2xl border border-border px-6 py-4">
-              <p className="text-xs text-muted">Showing {(usersPage - 1) * USERS_PAGE_SIZE + 1}&ndash;{Math.min(usersPage * USERS_PAGE_SIZE, filteredUsers.length)} of {filteredUsers.length}</p>
-              <div className="flex items-center gap-1">
-                <button onClick={() => setUsersPage(1)} disabled={usersPage === 1} className="px-2.5 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-surface transition-all disabled:opacity-30 disabled:cursor-not-allowed hidden sm:block">First</button>
-                <button onClick={() => setUsersPage((p) => Math.max(1, p - 1))} disabled={usersPage === 1} className="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-surface transition-all disabled:opacity-30 disabled:cursor-not-allowed">Prev</button>
-                {(() => { const tp = usersTotalPages; const pages: (number | "dots")[] = []; if (tp <= 7) { for (let i = 1; i <= tp; i++) pages.push(i); } else { pages.push(1); if (usersPage > 3) pages.push("dots"); for (let i = Math.max(2, usersPage - 1); i <= Math.min(tp - 1, usersPage + 1); i++) pages.push(i); if (usersPage < tp - 2) pages.push("dots"); pages.push(tp); } return pages.map((page, idx) => page === "dots" ? <span key={`d${idx}`} className="w-8 h-8 flex items-center justify-center text-muted text-sm">...</span> : <button key={page} onClick={() => setUsersPage(page)} className={`w-8 h-8 rounded-lg text-sm font-semibold transition-all ${usersPage === page ? "bg-gradient-to-r from-danger to-accent-warm text-white shadow-lg shadow-danger/25" : "text-muted hover:text-foreground hover:bg-surface"}`}>{page}</button>); })()}
-                <button onClick={() => setUsersPage((p) => Math.min(usersTotalPages, p + 1))} disabled={usersPage === usersTotalPages} className="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-surface transition-all disabled:opacity-30 disabled:cursor-not-allowed">Next</button>
-                <button onClick={() => setUsersPage(usersTotalPages)} disabled={usersPage === usersTotalPages} className="px-2.5 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-surface transition-all disabled:opacity-30 disabled:cursor-not-allowed hidden sm:block">Last</button>
-              </div>
-            </div>
-          )}
+          <div className="bg-card rounded-2xl border border-border">
+            <Pagination
+              currentPage={usersPage}
+              totalPages={usersTotalPages}
+              totalItems={filteredUsers.length}
+              pageSize={USERS_PAGE_SIZE}
+              onPageChange={setUsersPage}
+              activeClass="bg-gradient-to-br from-danger to-accent-warm text-white shadow-lg"
+            />
+          </div>
         </>
       )}
 

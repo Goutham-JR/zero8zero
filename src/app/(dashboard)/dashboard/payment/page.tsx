@@ -1,13 +1,22 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/store/auth-store";
 import { Loader2, CreditCard } from "lucide-react";
 
 export default function PaymentPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center py-24"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>}>
+      <PaymentContent />
+    </Suspense>
+  );
+}
+
+function PaymentContent() {
   const searchParams = useSearchParams();
   const user = useAuthStore((s) => s.user);
+  const token = useAuthStore((s) => s.token);
   const profile = useAuthStore((s) => s.profile);
   const formRef = useRef<HTMLFormElement>(null);
   const [loading, setLoading] = useState(true);
@@ -32,7 +41,7 @@ export default function PaymentPage() {
 
     fetch("/api/ccavenue/encrypt", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({
         order_id: orderId,
         amount,
@@ -65,7 +74,7 @@ export default function PaymentPage() {
         setError("Failed to initiate payment. Please try again.");
         setLoading(false);
       });
-  }, [amount, user, profile, planName, calls, days, basePrice, planId]);
+  }, [amount, user, token, profile, planName, calls, days, basePrice, planId]);
 
   // Auto-submit form once payment data is ready
   useEffect(() => {

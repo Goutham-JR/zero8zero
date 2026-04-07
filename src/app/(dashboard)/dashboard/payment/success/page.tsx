@@ -1,10 +1,19 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle, ArrowRight, Receipt } from "lucide-react";
+import { CheckCircle, ArrowRight, Receipt, Loader2 } from "lucide-react";
 
 export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center py-24"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>}>
+      <SuccessContent />
+    </Suspense>
+  );
+}
+
+function SuccessContent() {
   const params = useSearchParams();
 
   const orderId = params.get("order_id") || "";

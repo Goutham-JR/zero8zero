@@ -3,9 +3,9 @@ import { decrypt } from "@/lib/ccavenue";
 import { logToSheet } from "@/lib/google-sheet";
 
 const OBD_API = "https://obd3api.expressivr.com";
-const RESELLER_USERNAME = "Cloudcentral";
-const RESELLER_PASSWORD = "Admin@123";
-const RESELLER_USERID = "500099";
+const RESELLER_USERNAME = process.env.RESELLER_USERNAME!;
+const RESELLER_PASSWORD = process.env.RESELLER_PASSWORD!;
+const RESELLER_USERID = process.env.RESELLER_USERID!;
 
 async function getResellerToken(): Promise<string | null> {
   try {
@@ -30,24 +30,28 @@ async function getUserProfile(token: string, userId: string) {
 }
 
 async function addCredits(token: string, userId: string, credits: string) {
+  const payload = { userId: Number(userId), parent: RESELLER_USERID.trim(), credits: String(credits) };
+  console.log("[Credits] Add request:", JSON.stringify(payload));
   const res = await fetch(`${OBD_API}/api/obd/credits/add`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ userId: Number(userId), parent: RESELLER_USERID, credits }),
+    body: JSON.stringify(payload),
   });
   const data = await res.json();
-  console.log("Credits added:", data);
+  console.log("[Credits] Add response:", res.status, JSON.stringify(data));
   return res.ok;
 }
 
 async function removeCredits(token: string, userId: string, credits: string) {
+  const payload = { userId: Number(userId), parent: RESELLER_USERID.trim(), credits: String(credits) };
+  console.log("[Credits] Remove request:", JSON.stringify(payload));
   const res = await fetch(`${OBD_API}/api/obd/credits/remove`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ userId: Number(userId), parent: RESELLER_USERID, credits }),
+    body: JSON.stringify(payload),
   });
   const data = await res.json();
-  console.log("Credits removed:", data);
+  console.log("[Credits] Remove response:", res.status, JSON.stringify(data));
   return res.ok;
 }
 
@@ -100,9 +104,10 @@ async function processCreditsAndPlan(userId: string, newCredits: string, newPlan
     const availableCredits = Number(profile.credits || 0);
     const newExpiryDate = calculateExpiryDate(days);
 
-    console.log(`[Credits] User ${userId}: currentPlanId=${currentPlanId}, newPlanId=${newPlanId}, availableCredits=${availableCredits}, newExpiry=${newExpiryDate}`);
+    console.log(`[Credits] User ${userId}: currentPlanId="${currentPlanId}" (type:${typeof currentPlanId}), newPlanId="${newPlanId}" (type:${typeof newPlanId}), availableCredits=${availableCredits}, newExpiry=${newExpiryDate}`);
+    console.log(`[Credits] Same plan? ${currentPlanId === newPlanId} | trimmed match? ${currentPlanId.trim() === newPlanId.trim()}`);
 
-    if (currentPlanId === newPlanId) {
+    if (currentPlanId.trim() === newPlanId.trim()) {
       // Same plan — add credits and extend expiry from now
       console.log(`[Credits] Same plan ${newPlanId}, adding ${newCredits} credits, extending expiry by ${days} days`);
       const added = await addCredits(token, userId, newCredits);
@@ -112,7 +117,7 @@ async function processCreditsAndPlan(userId: string, newCredits: string, newPlan
 
       return added;
     } else {
-      // Different plan — remove existing credits, add new credits, update planId + expiry
+      // Different plan — remove existing credits, update plan, then add new credits
       console.log(`[Credits] Different plan: ${currentPlanId} -> ${newPlanId}`);
 
       if (availableCredits > 0) {
@@ -123,13 +128,13 @@ async function processCreditsAndPlan(userId: string, newCredits: string, newPlan
         console.log(`[Credits] No credits to remove (balance: ${availableCredits})`);
       }
 
-      console.log(`[Credits] Adding ${newCredits} credits...`);
-      const added = await addCredits(token, userId, newCredits);
-      console.log(`[Credits] Add result: ${added}`);
-
       console.log(`[Credits] Updating plan to ${newPlanId}, expiry to ${newExpiryDate}...`);
       const updated = await updateUserPlan(token, profile, newPlanId, newExpiryDate);
       console.log(`[Credits] Plan update result: ${updated}`);
+
+      console.log(`[Credits] Adding ${newCredits} credits...`);
+      const added = await addCredits(token, userId, newCredits);
+      console.log(`[Credits] Add result: ${added}`);
 
       return added;
     }
@@ -173,6 +178,12 @@ export async function POST(req: NextRequest) {
     const statusMessage = params.status_message || "";
 
     console.log("[Payment] Parsed params:", { orderStatus, userId, basePrice, planId, calls, days, amount });
+
+    // Verify this order was initiated by our system (order IDs are formatted as Z8Z_{userId}_{timestamp})
+    if (!orderId.startsWith("Z8Z_")) {
+      console.error("[Payment] Invalid order_id format:", orderId);
+      return redirectTo("/dashboard/payment/failure?error=invalid_order");
+    }
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
 
@@ -245,7 +256,8 @@ export async function POST(req: NextRequest) {
       );
     }
   } catch (error) {
-    console.error("CCAvenue response error:", error);
+    console.error("CCAvenue response error:", error instanceof Error ? error.message : error);
+    console.error("CCAvenue response stack:", error instanceof Error ? error.stack : "no stack");
     return redirectTo("/dashboard/payment/failure?error=decrypt_failed");
   }
 }

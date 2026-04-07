@@ -16,6 +16,7 @@ import {
   AlertCircle,
   Hash,
 } from "lucide-react";
+import { Pagination } from "@/components/pagination";
 
 const INPUT_CLASS =
   "w-full px-4 py-3 border border-border rounded-xl bg-input-bg text-foreground focus:outline-none focus:ring-2 focus:ring-danger/30 focus:border-danger transition-all text-sm";
@@ -243,23 +244,14 @@ export default function AdminReportsPage() {
             })}
           </div>
 
-          {/* Pagination */}
-          {(() => {
-            const tp = Math.ceil(generatedReports.length / REPORTS_PAGE_SIZE);
-            if (tp <= 1) return null;
-            return (
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-6 py-4 border-t border-border">
-                <p className="text-xs text-muted">Showing {(reportsPage - 1) * REPORTS_PAGE_SIZE + 1}&ndash;{Math.min(reportsPage * REPORTS_PAGE_SIZE, generatedReports.length)} of {generatedReports.length}</p>
-                <div className="flex items-center gap-1">
-                  <button onClick={() => setReportsPage(1)} disabled={reportsPage === 1} className="px-2.5 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-surface transition-all disabled:opacity-30 disabled:cursor-not-allowed hidden sm:block">First</button>
-                  <button onClick={() => setReportsPage((p) => Math.max(1, p - 1))} disabled={reportsPage === 1} className="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-surface transition-all disabled:opacity-30 disabled:cursor-not-allowed">Prev</button>
-                  {(() => { const pages: (number | "dots")[] = []; const t = tp; if (t <= 7) { for (let i = 1; i <= t; i++) pages.push(i); } else { pages.push(1); if (reportsPage > 3) pages.push("dots"); for (let i = Math.max(2, reportsPage - 1); i <= Math.min(t - 1, reportsPage + 1); i++) pages.push(i); if (reportsPage < t - 2) pages.push("dots"); pages.push(t); } return pages.map((page, idx) => page === "dots" ? <span key={`d${idx}`} className="w-8 h-8 flex items-center justify-center text-muted text-sm">...</span> : <button key={page} onClick={() => setReportsPage(page)} className={`w-8 h-8 rounded-lg text-sm font-semibold transition-all ${reportsPage === page ? "bg-gradient-to-r from-danger to-accent-warm text-white shadow-lg shadow-danger/25" : "text-muted hover:text-foreground hover:bg-surface"}`}>{page}</button>); })()}
-                  <button onClick={() => setReportsPage((p) => Math.min(tp, p + 1))} disabled={reportsPage === tp} className="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-surface transition-all disabled:opacity-30 disabled:cursor-not-allowed">Next</button>
-                  <button onClick={() => setReportsPage(tp)} disabled={reportsPage === tp} className="px-2.5 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-surface transition-all disabled:opacity-30 disabled:cursor-not-allowed hidden sm:block">Last</button>
-                </div>
-              </div>
-            );
-          })()}
+          <Pagination
+            currentPage={reportsPage}
+            totalPages={Math.ceil(generatedReports.length / REPORTS_PAGE_SIZE)}
+            totalItems={generatedReports.length}
+            pageSize={REPORTS_PAGE_SIZE}
+            onPageChange={setReportsPage}
+            activeClass="bg-gradient-to-br from-danger to-accent-warm text-white shadow-lg"
+          />
         </div>
       )}
 

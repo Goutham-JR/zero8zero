@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Mail, Phone, MapPin, Send, MessageCircle, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 
-const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1488963627666116709/wOCU6wEc_d5ycaN_jLcfQw9dt_f8UI11hagUftWp0PGUlkop-mWWhzXBGLKC8WU9GdrQ";
 const WHATSAPP_LINK = "https://wa.me/918951537972";
 const TELEGRAM_LINK = "https://t.me/zero8zero";
 const DISCORD_LINK = "https://discord.gg/7sjpRaGPBX";
@@ -26,32 +25,12 @@ export default function ContactUsPage() {
     setStatus("idle");
 
     try {
-      const res = await fetch(DISCORD_WEBHOOK, {
+      const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: "Zero8Zero",
-          avatar_url: "https://zero8zero.com/favicon.ico",
-          embeds: [{
-            title: "New Contact Form Submission",
-            description: `**${name}** has sent a message from the Zero8Zero website.`,
-            color: 0x4A35E0,
-            thumbnail: { url: "https://ui-avatars.com/api/?name=" + encodeURIComponent(name) + "&background=4A35E0&color=fff&size=128&bold=true" },
-            fields: [
-              { name: "\ud83d\udc64 Name", value: `\`${name}\``, inline: true },
-              { name: "\ud83d\udcde Phone", value: `\`${number}\``, inline: true },
-              { name: "\ud83d\udce7 Email", value: `\`${email}\``, inline: true },
-              { name: "\ud83d\udcac Message", value: `>>> ${message}` },
-            ],
-            footer: {
-              text: "Zero8Zero Contact Form \u2022 Cloud Central",
-              icon_url: "https://ui-avatars.com/api/?name=Z8Z&background=4A35E0&color=fff&size=32&bold=true",
-            },
-            timestamp: new Date().toISOString(),
-          }],
-        }),
+        body: JSON.stringify({ name, number, email, message }),
       });
-      if (res.ok || res.status === 204) {
+      if (res.ok) {
         setStatus("success");
         setName("");
         setNumber("");

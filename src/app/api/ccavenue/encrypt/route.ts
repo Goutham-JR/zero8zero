@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { encrypt } from "@/lib/ccavenue";
+import { addPendingOrder } from "@/lib/order-store";
+
+const OBD_API = "https://obd3api.expressivr.com";
 
 export async function POST(req: NextRequest) {
   try {
+    // Verify the user is authenticated
+    const authHeader = req.headers.get("authorization");
+    const token = authHeader?.replace("Bearer ", "");
+    if (!token) {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    }
+
     const body = await req.json();
 
     const {
@@ -24,6 +34,17 @@ export async function POST(req: NextRequest) {
       merchant_param4, // basePrice (without GST)
       merchant_param5, // planId
     } = body;
+
+    // Validate token by fetching the user's profile
+    if (!merchant_param3) {
+      return NextResponse.json({ error: "Missing user ID" }, { status: 400 });
+    }
+    const verifyRes = await fetch(`${OBD_API}/api/obd/user/profile/${merchant_param3}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (verifyRes.status === 401) {
+      return NextResponse.json({ error: "Invalid or expired session" }, { status: 401 });
+    }
 
     const merchantId = process.env.CCAVENUE_MERCHANT_ID!;
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
@@ -52,6 +73,8 @@ export async function POST(req: NextRequest) {
       `merchant_param4=${merchant_param4 || ""}`,
       `merchant_param5=${merchant_param5 || ""}`,
     ].join("&");
+
+    addPendingOrder(order_id);
 
     const encRequest = encrypt(params);
     const accessCode = process.env.CCAVENUE_ACCESS_CODE!;

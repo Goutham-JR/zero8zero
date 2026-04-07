@@ -11,6 +11,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth-store";
+import { Pagination } from "@/components/pagination";
 import { getDefaultDateRange } from "@/services/api";
 import { fetchAdminCampaignAnalysis } from "@/services/admin.service";
 import type { CampaignAnalysis } from "@/types";
@@ -283,23 +284,14 @@ export default function AdminCampaignsPage() {
             </table>
           </div>
 
-          {/* Pagination */}
-          {(() => {
-            const tp = Math.ceil(data.length / PAGE_SIZE);
-            if (tp <= 1) return null;
-            return (
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-6 py-4 border-t border-border">
-                <p className="text-xs text-muted">Showing {(currentPage - 1) * PAGE_SIZE + 1}&ndash;{Math.min(currentPage * PAGE_SIZE, data.length)} of {data.length}</p>
-                <div className="flex items-center gap-1">
-                  <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1} className="px-2.5 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-surface transition-all disabled:opacity-30 disabled:cursor-not-allowed hidden sm:block">First</button>
-                  <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-surface transition-all disabled:opacity-30 disabled:cursor-not-allowed">Prev</button>
-                  {(() => { const pages: (number | "dots")[] = []; if (tp <= 7) { for (let i = 1; i <= tp; i++) pages.push(i); } else { pages.push(1); if (currentPage > 3) pages.push("dots"); for (let i = Math.max(2, currentPage - 1); i <= Math.min(tp - 1, currentPage + 1); i++) pages.push(i); if (currentPage < tp - 2) pages.push("dots"); pages.push(tp); } return pages.map((page, idx) => page === "dots" ? <span key={`d${idx}`} className="w-8 h-8 flex items-center justify-center text-muted text-sm">...</span> : <button key={page} onClick={() => setCurrentPage(page)} className={`w-8 h-8 rounded-lg text-sm font-semibold transition-all ${currentPage === page ? "bg-gradient-to-r from-danger to-accent-warm text-white shadow-lg shadow-danger/25" : "text-muted hover:text-foreground hover:bg-surface"}`}>{page}</button>); })()}
-                  <button onClick={() => setCurrentPage((p) => Math.min(tp, p + 1))} disabled={currentPage === tp} className="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-surface transition-all disabled:opacity-30 disabled:cursor-not-allowed">Next</button>
-                  <button onClick={() => setCurrentPage(tp)} disabled={currentPage === tp} className="px-2.5 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-surface transition-all disabled:opacity-30 disabled:cursor-not-allowed hidden sm:block">Last</button>
-                </div>
-              </div>
-            );
-          })()}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={Math.ceil(data.length / PAGE_SIZE)}
+            totalItems={data.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setCurrentPage}
+            activeClass="bg-gradient-to-br from-danger to-accent-warm text-white shadow-lg"
+          />
         </div>
       )}
     </div>

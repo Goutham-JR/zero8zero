@@ -16,6 +16,7 @@ import {
   Pencil,
   Save,
 } from "lucide-react";
+import { Pagination } from "@/components/pagination";
 
 interface AgentItem {
   agentId: number;
@@ -549,22 +550,7 @@ export default function AgentGroupsPage() {
             );
           })}
         </div>
-        {(() => {
-          const tp = Math.ceil(groups.length / GROUPS_PAGE_SIZE);
-          if (tp <= 1) return null;
-          return (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-card rounded-2xl border border-border px-6 py-4">
-              <p className="text-xs text-muted">Showing {(groupsPage - 1) * GROUPS_PAGE_SIZE + 1}&ndash;{Math.min(groupsPage * GROUPS_PAGE_SIZE, groups.length)} of {groups.length}</p>
-              <div className="flex items-center gap-1">
-                <button onClick={() => setGroupsPage(1)} disabled={groupsPage === 1} className="px-2.5 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-surface transition-all disabled:opacity-30 disabled:cursor-not-allowed hidden sm:block">First</button>
-                <button onClick={() => setGroupsPage((p) => Math.max(1, p - 1))} disabled={groupsPage === 1} className="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-surface transition-all disabled:opacity-30 disabled:cursor-not-allowed">Prev</button>
-                {(() => { const pages: (number | "dots")[] = []; if (tp <= 7) { for (let i = 1; i <= tp; i++) pages.push(i); } else { pages.push(1); if (groupsPage > 3) pages.push("dots"); for (let i = Math.max(2, groupsPage - 1); i <= Math.min(tp - 1, groupsPage + 1); i++) pages.push(i); if (groupsPage < tp - 2) pages.push("dots"); pages.push(tp); } return pages.map((page, idx) => page === "dots" ? <span key={`d${idx}`} className="w-8 h-8 flex items-center justify-center text-muted text-sm">...</span> : <button key={page} onClick={() => setGroupsPage(page)} className={`w-8 h-8 rounded-lg text-sm font-semibold transition-all ${groupsPage === page ? "gradient-bg text-white shadow-lg shadow-primary/25" : "text-muted hover:text-foreground hover:bg-surface"}`}>{page}</button>); })()}
-                <button onClick={() => setGroupsPage((p) => Math.min(tp, p + 1))} disabled={groupsPage === tp} className="px-3 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-surface transition-all disabled:opacity-30 disabled:cursor-not-allowed">Next</button>
-                <button onClick={() => setGroupsPage(tp)} disabled={groupsPage === tp} className="px-2.5 py-1.5 rounded-lg text-sm font-medium text-muted hover:text-foreground hover:bg-surface transition-all disabled:opacity-30 disabled:cursor-not-allowed hidden sm:block">Last</button>
-              </div>
-            </div>
-          );
-        })()}
+        <Pagination currentPage={groupsPage} totalPages={Math.ceil(groups.length / GROUPS_PAGE_SIZE)} totalItems={groups.length} pageSize={GROUPS_PAGE_SIZE} onPageChange={setGroupsPage} />
         </div>
       )}
     </div>

@@ -1,10 +1,12 @@
-const GOOGLE_SHEET_WEBHOOK =
-  "https://script.google.com/macros/s/AKfycbxCJvAZUNZrSIozPKJPMebT5Be8KnOqYafyaXZhUHBjVjIm_X-zskln-iiVXkKLEdt5/exec";
-
 // Server-side: calls Google Sheets directly
 export async function logToSheet(data: Record<string, string>) {
+  const url = process.env.GOOGLE_SHEET_WEBHOOK;
+  if (!url) {
+    console.error("[Sheet] GOOGLE_SHEET_WEBHOOK not configured");
+    return;
+  }
   try {
-    await fetch(GOOGLE_SHEET_WEBHOOK, {
+    await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
