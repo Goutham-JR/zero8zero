@@ -90,6 +90,9 @@ export default function UserManagementPage() {
 
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
   const [editForm, setEditForm] = useState<FormState>({ ...emptyForm });
+  // Preserve the user's current modules so we send them back on update instead of
+  // hardcoding Custom IVR, which would strip any extra modules (Webhooks, API, etc).
+  const [editingUserModules, setEditingUserModules] = useState<ModuleItem[]>([]);
   const [updating, setUpdating] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
 
@@ -187,7 +190,7 @@ export default function UserManagementPage() {
         userType: "user", expiryDate: `${createForm.expiryDate} 23:59:59`, auth_token: token,
         groupRows: JSON.stringify({ groupsList: [{ groupId: "34", groupName: "BLR_ALL" }] }),
         locationRows: JSON.stringify({ locationsList: [{ locationId: "3", locationName: "Bangalore" }] }),
-        moduleId: createForm.moduleId, planType: "0",
+        moduleId: "1", planType: "0",
       });
       setSuccess(res.message || `User "${createForm.username}" created.`);
       setShowCreateModal(false);
@@ -202,6 +205,7 @@ export default function UserManagementPage() {
 
   const openEditModal = async (u: AdminUser) => {
     setEditingUser(u);
+    setEditingUserModules([]);
     setEditLoading(true);
     setEditForm({
       username: u.username, password: "", name: u.name || "", emailid: u.emailid || "",
@@ -219,6 +223,8 @@ export default function UserManagementPage() {
           pincode: profile.pincode ? String(profile.pincode) : "",
           planId: profile.planId ? String(profile.planId) : f.planId,
         }));
+        const profileModules = Array.isArray(profile.modules) ? (profile.modules as ModuleItem[]) : [];
+        setEditingUserModules(profileModules);
       }
     } catch { /* silent */ } finally { setEditLoading(false); }
   };
@@ -228,6 +234,12 @@ export default function UserManagementPage() {
     setUpdating(true);
     clearMessages();
     try {
+      // Preserve the user's current modules. If the profile had none (e.g. previously
+      // nuked by a buggy update), fall back to Custom IVR so the field is never empty.
+      const moduleListToSend = editingUserModules.length > 0
+        ? editingUserModules.map((m) => ({ moduleId: m.moduleId, moduleName: m.moduleName }))
+        : [{ moduleId: 1, moduleName: "Custom IVR" }];
+
       const res = await updateUserProfile({
         userId: editingUser.userId,
         username: editingUser.username,
@@ -245,7 +257,7 @@ export default function UserManagementPage() {
         userType: "user",
         groupRows: JSON.stringify({ groupsList: [{ groupId: "34", groupName: "BLR_ALL" }] }),
         locationRows: JSON.stringify({ locationsList: [{ locationId: "3", locationName: "Bangalore" }] }),
-        moduleId: "1",
+        moduleRows: JSON.stringify({ moduleList: moduleListToSend }),
         planType: "0",
       });
       // Update user details in Google Sheet (don't block on failure)

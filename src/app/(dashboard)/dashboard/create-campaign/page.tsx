@@ -95,10 +95,13 @@ const RETRY_OPTIONS = [
   { value: "2", label: "2 times" },
 ];
 
+// NOTE: OBD3 API expects retryInterval in SECONDS, despite the error message saying
+// "Only 15 Min / 30 Min / 60 Min allowed". Values shown in minutes, sent in seconds.
+// When retries === 0, the API requires retryInterval === 0 as well.
 const INTERVAL_OPTIONS = [
-  { value: "0", label: "0 mins" },
-  { value: "15", label: "15 mins" },
-  { value: "30", label: "30 mins" },
+  { value: "900", label: "15 mins" },
+  { value: "1800", label: "30 mins" },
+  { value: "3600", label: "60 mins" },
 ];
 
 const MENU_WAIT_OPTIONS = [
@@ -369,7 +372,7 @@ function CampaignModal({
   const [mainAudioId, setMainAudioId] = useState("");
   const [scheduleDate, setScheduleDate] = useState("");
   const [retries, setRetries] = useState("0");
-  const [retryInterval, setRetryInterval] = useState("0");
+  const [retryInterval, setRetryInterval] = useState("900"); // 15 mins in seconds
 
   // Input IVR + Call Patch
   const [menuWaitTime, setMenuWaitTime] = useState("3");
@@ -387,6 +390,7 @@ function CampaignModal({
   const [selectedGroupIds, setSelectedGroupIds] = useState<Set<number>>(new Set());
 
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const approvedPrompts = prompts.filter((p) => p.promptStatus === 1);
 
@@ -547,15 +551,21 @@ function CampaignModal({
     const templateId = type === "simple" ? "0" : type === "input" ? "1" : "2";
     const formattedTime = formatScheduleTime(scheduleDate);
 
-    // Build payload matching exact API format
+    // OBD3 API requires retries and retryInterval as integers (not strings).
+    // Rule discovered by testing: retries === 0 → interval must be 0.
+    // retries > 0 → interval must be sent in SECONDS (900 / 1800 / 3600).
+    // The backend error message talks about "15/30/60 Min" but actually wants seconds.
+    const retriesNum = Number(retries) || 0;
+    const retryIntervalNum = retriesNum === 0 ? 0 : (Number(retryInterval) || 900);
+
     const base: Record<string, unknown> = {
       userId: String(userId),
       campaignName: campaignName.trim(),
       templateId,
       baseId: String(selectedBaseId),
       scheduleTime: formattedTime,
-      retries: String(retries),
-      retryInterval: String(retryInterval),
+      retries: retriesNum,
+      retryInterval: retryIntervalNum,
       smsSuccessApi: "",
       smsFailApi: "",
       smsDtmfApi: "",
@@ -614,8 +624,8 @@ function CampaignModal({
         smsFailApi: "",
         smsDtmfApi: "",
         callDurationSMS: 0,
-        retries: String(retries),
-        retryInterval: String(retryInterval),
+        retries: retriesNum,
+        retryInterval: retryIntervalNum,
         agentRows: buildAgentRows(),
         menuWaitTime: String(menuWaitTime),
         rePrompt: String(repromptCount),
@@ -629,9 +639,33 @@ function CampaignModal({
       };
     }
 
-    // Fire and close — campaign is created server-side once the request is sent
-    composeCampaign(payload).catch(() => {});
-    onSuccess();
+    // Await the compose API and surface any error to the user instead of silently closing.
+    setSubmitting(true);
+    try {
+      const res = await composeCampaign(payload);
+      if (!res?.campaignId) {
+        setSubmitError(translateComposeError(res?.message));
+        return;
+      }
+      onSuccess();
+    } catch (err) {
+      const raw = err instanceof Error ? err.message : "Failed to start campaign.";
+      setSubmitError(translateComposeError(raw));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  // Translate known backend error messages into something users can act on.
+  function translateComposeError(raw?: string): string {
+    const msg = raw || "Failed to start campaign.";
+    if (/Invalid Schedule Date/i.test(msg)) {
+      return "Invalid schedule time. Please pick a future time.";
+    }
+    if (/Only\s+\d+\s+Min.*interval allowed/i.test(msg)) {
+      return "Invalid retry interval. Please choose 15, 30, or 60 minutes.";
+    }
+    return msg;
   }
 
   const inputClass = "w-full px-4 py-3 border border-border rounded-xl bg-input-bg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm";
@@ -898,9 +932,14 @@ function CampaignModal({
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <label className="text-sm font-medium text-foreground">Retry Interval <span className="text-danger">*</span></label>
-                  <InfoTip text="The waiting time between retry attempts. A longer interval gives recipients more time to become available." />
+                  <InfoTip text="The waiting time between retry attempts. Only applies when retries is greater than 0." />
                 </div>
-                <select value={retryInterval} onChange={(e) => setRetryInterval(e.target.value)} className={selectClass}>
+                <select
+                  value={retryInterval}
+                  onChange={(e) => setRetryInterval(e.target.value)}
+                  disabled={retries === "0"}
+                  className={`${selectClass} disabled:opacity-60 disabled:cursor-not-allowed`}
+                >
                   {INTERVAL_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </div>
@@ -927,10 +966,11 @@ function CampaignModal({
             <button
               type="button"
               onClick={handleSubmit}
-              className={`flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r ${ivr.gradient} text-white rounded-xl text-sm font-semibold hover:opacity-90 transition-all shadow-lg ${ivr.shadow}`}
+              disabled={submitting}
+              className={`flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r ${ivr.gradient} text-white rounded-xl text-sm font-semibold hover:opacity-90 transition-all shadow-lg ${ivr.shadow} disabled:opacity-60 disabled:cursor-not-allowed`}
             >
               <Megaphone className="w-4 h-4" />
-              Create Campaign
+              {submitting ? "Starting…" : "Create Campaign"}
             </button>
           </div>
       </div>

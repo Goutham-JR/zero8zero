@@ -65,6 +65,13 @@ function calculateExpiryDate(days: number): string {
 }
 
 async function updateUserPlan(token: string, profile: Record<string, unknown>, newPlanId: string, expiryDate: string) {
+  // Preserve the user's current modules. Sending user/update without moduleRows (or
+  // with the wrong field) silently wipes them, so always echo back what's on the profile.
+  const profileModules = Array.isArray(profile.modules) ? (profile.modules as Array<{ moduleId: number; moduleName: string }>) : [];
+  const moduleListToSend = profileModules.length > 0
+    ? profileModules.map((m) => ({ moduleId: m.moduleId, moduleName: m.moduleName }))
+    : [{ moduleId: 1, moduleName: "Custom IVR" }];
+
   const res = await fetch(`${OBD_API}/api/obd/user/update`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -85,7 +92,7 @@ async function updateUserPlan(token: string, profile: Record<string, unknown>, n
       userType: "user",
       groupRows: JSON.stringify({ groupsList: [{ groupId: "34", groupName: "BLR_ALL" }] }),
       locationRows: JSON.stringify({ locationsList: [{ locationId: "3", locationName: "Bangalore" }] }),
-      moduleId: "1",
+      moduleRows: JSON.stringify({ moduleList: moduleListToSend }),
       planType: "0",
     }),
   });
